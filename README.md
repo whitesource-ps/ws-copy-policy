@@ -7,7 +7,7 @@
 
 
 # WhiteSource copy policy tool
-The scrip allows copying policies automatically, from the template project to the newly created projects, and update existing projects with the template policy.
+The script allows copying policies automatically, from the template project to the newly created projects, and update existing projects with the template policy.
 It should run periodically, in order to make sure that all the policies under the required projects are up to date.
 
 ### How to use the script
