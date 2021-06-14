@@ -79,6 +79,9 @@ def main():
     logging.info("Using url %s", url)
     get_policies()
 
+    logging.info("Status: SUCCESS")
+    sys.exit(0)
+
 
 def get_policies():
     """
@@ -126,9 +129,6 @@ def get_policies():
                             f"but there is no {scope} with this key value. Skip to the next item.")
         size_of_finished_copies = size_of_finished_copies + 1
         logging.info(f"Finish handling {size_of_finished_copies} out of the {scope_size} {scope}s")
-
-    logging.info("Status: SUCCESS")
-    sys.exit(0)
 
 
 def post_request(request_type, body):
