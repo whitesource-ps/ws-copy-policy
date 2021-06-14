@@ -1,4 +1,4 @@
-name: WS Ignore Future Alerts Build and Publish
+name: WS Copy Policy Build and Publish
 on: [push]
 
 jobs:
