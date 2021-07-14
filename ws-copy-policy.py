@@ -228,17 +228,20 @@ def is_template_policies_and_target_policies_equals(template_policies, target_po
     """
     equals_policies = False
     if len(template_policies) == len(target_policies):
+        template_policies_to_compare = []
+        target_policies_to_compare = []
         for policy in template_policies:
-            # remove from policy 'id' and 'creationTime' fields
-            policy.pop("id", None)
-            policy.pop("creationTime", None)
+            # create new policy object with only relevant fields for comparison
+            policy_to_compare = {'name': policy['name'], 'filter': policy['filter'], 'action': policy['action']}
+            template_policies_to_compare.append(policy_to_compare)
 
         for policy in target_policies:
-            # remove from policy 'id' and 'creationTime' fields
-            policy.pop("id", None)
-            policy.pop("creationTime", None)
+            policy_to_compare = {'name': policy['name'], 'filter': policy['filter'], 'action': policy['action']}
+            # create new policy object with only relevant fields for comparison
+            target_policies_to_compare.append(policy_to_compare)
 
-        equals_policies = ordered(template_policies) == ordered(target_policies)
+        equals_policies = ordered(template_policies_to_compare) == ordered(target_policies_to_compare)
+
     return equals_policies
 
 
