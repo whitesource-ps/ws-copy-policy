@@ -16,6 +16,12 @@ url = ''
 scope = None
 logger = logging.getLogger()
 
+agent_info = "agentInfo"
+AGENT_NAME = "ps-copy-policy"
+AGENT_VERSION = "0.1.2"
+
+agent_info_details = {"agent": AGENT_NAME, "agentVersion": AGENT_VERSION}
+
 
 class Configuration:
     def __init__(self):
@@ -140,6 +146,7 @@ def post_request(request_type, body):
     """
     logging.info(f"Start {request_type} api", )
     headers = {'content-type': 'application/json'}
+    body.update({agent_info: agent_info_details})
     response = requests.post(url, data=json.dumps(body), headers=headers)
     logging.info(f"Finish {request_type} api", )
     response_object = json.loads(response.text)
