@@ -1,10 +1,11 @@
 import argparse
-import sys
-import logging
-from configparser import ConfigParser
-import requests
 import json
+import logging
+import sys
+from configparser import ConfigParser
 from copy import deepcopy
+
+import requests
 
 LOG_DIR = 'logs'
 LOG_FILE_WITH_PATH = LOG_DIR + '/ws-copy-policy.log'
@@ -17,10 +18,11 @@ scope = None
 logger = logging.getLogger()
 
 agent_info = "agentInfo"
-AGENT_NAME = "ps-copy-policy"
+
+AGENT_NAME = "copy-policy"
 AGENT_VERSION = "0.1.2"
 
-agent_info_details = {"agent": AGENT_NAME, "agentVersion": AGENT_VERSION}
+agent_info_details = {"agent": "ps-" + AGENT_NAME, "agentVersion": AGENT_VERSION}
 
 
 class Configuration:
@@ -59,7 +61,6 @@ class ArgumentsParser:
 
 
 def main():
-
     global user_key
     global org_token
     global url
@@ -279,7 +280,7 @@ def delete_policies_from_scope(token, scope_name, target_policies):
                     "policyIds": policy_ids}
         removed_policies = post_request(request_type, body)
         if removed_policies['removedPolicies'] > 0:
-            logging.info(f"{removed_policies['removedPolicies'] } policies has been deleted from the {scope_name}")
+            logging.info(f"{removed_policies['removedPolicies']} policies has been deleted from the {scope_name}")
 
 
 def add_policies_from_template_to_target(token, project_name, template_policies):
