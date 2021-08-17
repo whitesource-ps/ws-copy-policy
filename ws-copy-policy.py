@@ -18,11 +18,11 @@ scope = None
 logger = logging.getLogger()
 
 agent_info = "agentInfo"
-
+PS = "ps-"
 AGENT_NAME = "copy-policy"
 AGENT_VERSION = "0.1.2"
 
-agent_info_details = {"agent": "ps-" + AGENT_NAME, "agentVersion": AGENT_VERSION}
+agent_info_details = {"agent": PS + AGENT_NAME, "agentVersion": AGENT_VERSION}
 
 
 class Configuration:
