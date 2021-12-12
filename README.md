@@ -40,7 +40,7 @@ In the event, the tag value of the project with `Policy.Template.Source` tag key
 
 ### Execution
 From the command line:
-- `python ws-copy-policy.py -u $wsUrl -k $userKey -o $orgToken -s $scope`
+- `python ws-copy-policy.py -u $wsUrl -k $userKey -o $orgToken -s $scope -t $thread`
 
 Using a config file:
 - `python ws-copy-policy.py`
@@ -62,8 +62,11 @@ for the installation and the execution (`pip3` and `python3` respectively)
 | DEFAULT       | orgToken             | WhiteSource API Key. Can be found under the 'Integrate' tab in your  |
 |               |                      | your WhiteSource organization.                                       |
 ---------------------------------------------------------------------------------------------------------------
-| DEFAULT       | scope                | Copying of all the policies from the source to the destination on    |
-|               |                      | the product or project level. Possible values: product/project.      |
+| DEFAULT       | scope                | The scope where the copying policies should be performed on.         |
+|               |                      | Possible values: product/project.                                    |
+---------------------------------------------------------------------------------------------------------------
+| DEFAULT       | thread               | Multi-threading - speeds up the copying, but it depends              |
+|               |                      | on your environment capabilities (default: 5).                       |
 ===============================================================================================================
 ```
 
