@@ -19,6 +19,13 @@ scope = None
 thread = 5
 logger = logging.getLogger()
 
+agent_info = "agentInfo"
+PS = "ps-"
+AGENT_NAME = "copy-policy"
+AGENT_VERSION = "0.1.2"
+
+agent_info_details = {"agent": PS + AGENT_NAME, "agentVersion": AGENT_VERSION}
+
 
 class Configuration:
     def __init__(self):
@@ -48,7 +55,6 @@ class ArgumentsParser:
         self.args = parser.parse_args()
 
 def main():
-
     global user_key
     global org_token
     global url
@@ -140,6 +146,7 @@ def post_request(request_type, body):
     """
     #logging.info(f"start {request_type} api", )
     headers = {'content-type': 'application/json'}
+    body.update({agent_info: agent_info_details})
     response = requests.post(url, data=json.dumps(body), headers=headers)
     #logging.info(f"finish {request_type} api", )
     response_object = json.loads(response.text)
