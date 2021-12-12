@@ -37,7 +37,7 @@ class Configuration:
         self.user_key = config.get('DEFAULT', 'userKey')
         self.org_token = config.get('DEFAULT', 'orgToken')
         self.scope = config.get('DEFAULT', 'scope')
-        self.thread = config.getint('DEFAULT', 'thread', fallback=False)
+        self.thread = config.getint('DEFAULT', 'thread', fallback=5)
 
 
 class ArgumentsParser:
@@ -53,6 +53,7 @@ class ArgumentsParser:
         parser.add_argument("-s", "--scope", help="WS scope", dest='scope', required=False)
         parser.add_argument("-t", "--thread", help="thread number", dest='thread', required=False, type=int, default=5)
         self.args = parser.parse_args()
+
 
 def main():
     global user_key
