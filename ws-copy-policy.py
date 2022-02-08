@@ -307,15 +307,15 @@ def add_policies_from_template_to_target(token, scope_name, template_policies):
         policy_to_add.pop("id", None)
         policy_to_add.pop("creationTime", None)
         # adding missing issue settings due to the new Issue Tracker
-        action_of_policy = policy_to_add["action"]
+        policy_action = policy_to_add["action"]
         ACTION_TYPE = "CREATE_ISSUE"
-        if ACTION_TYPE in action_of_policy["type"]:
+        if ACTION_TYPE in policy_action["type"]:
             missing_issue_settings = {
                 "issueSettings": {
                     "issueTrackerType": "COMMON_ISSUE_TRACKER"
                 }
             }
-            action_of_policy.update(missing_issue_settings)
+            policy_action.update(missing_issue_settings)
         logging.warning(f"  adding policy {policy_to_add['name']} to the {scope} {scope_name}")
         if scope == PROJECT:
             request_type = 'addProjectPolicy'
