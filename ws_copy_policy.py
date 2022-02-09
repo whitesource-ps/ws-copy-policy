@@ -100,7 +100,7 @@ def get_policies():
     body = {"requestType": request_type,
             "userKey": user_key,
             "orgToken": org_token}
-    scope_tags = post_request(request_type, body)
+    scope_tags = post_request(body)
     template_value_to_policies = {}
     scope_token_to_template_value_and_policies = {}
     fill_template_values_and_projects_from_response(scope_tags, template_value_to_policies,
@@ -138,18 +138,16 @@ def get_policies():
         #logging.info(f"finish handling {size_of_finished_copies} out of the {scope_size} {scope}s")
 
 
-def post_request(request_type, body):
+def post_request(body):
     """
 
     :param request_type:
     :param body:
     :return:
     """
-    #logging.info(f"start {request_type} api", )
     headers = {'content-type': 'application/json'}
     body.update({agent_info: agent_info_details})
     response = requests.post(url, data=json.dumps(body), headers=headers)
-    #logging.info(f"finish {request_type} api", )
     response_object = json.loads(response.text)
     check_errors_in_response(response_object)
     return response_object
@@ -198,7 +196,7 @@ def fill_template_values_and_projects_from_response(response, template_value_to_
 
 
 def worker(scope_item, body, request_type, tag_template_key, template_value_to_policies,
-            tag_scope_set_policies_key, scope_token_to_template_value_and_policies):
+           tag_scope_set_policies_key, scope_token_to_template_value_and_policies):
     tags = scope_item["tags"]
     scope_token = scope_item["token"]
     if scope == PROJECT:
@@ -290,7 +288,7 @@ def delete_policies_from_scope(token, scope_name, target_policies):
                     "userKey": user_key,
                     "productToken": token,
                     "policyIds": policy_ids}
-        removed_policies = post_request(request_type, body)
+        removed_policies = post_request(body)
         if removed_policies['removedPolicies'] > 0:
             logging.info(f"  {removed_policies['removedPolicies'] } policies have been deleted from the {scope} "
                          f"{scope_name}")
@@ -304,27 +302,34 @@ def add_policies_from_template_to_target(token, scope_name, template_policies):
     :param template_policies:
     """
 
-    for policyToAdd in template_policies:
+    for policy_to_add in template_policies:
         # remove from policy 'id' and 'creationTime' fields
-        policyToAdd.pop("id", None)
-        policyToAdd.pop("creationTime", None)
-        logging.warning(f"  adding policy {policyToAdd['name']} to the {scope} {scope_name}")
+        policy_to_add.pop("id", None)
+        policy_to_add.pop("creationTime", None)
+        # adding missing issue settings due to the new Issue Tracker
+        policy_action = policy_to_add["action"]
+        ACTION_TYPE = "CREATE_ISSUE"
+        if ACTION_TYPE in policy_action["type"]:
+            missing_issue_settings = {
+                "issueSettings": {
+                    "issueTrackerType": "COMMON_ISSUE_TRACKER"
+                }
+            }
+            policy_action.update(missing_issue_settings)
+        logging.warning(f"  adding policy {policy_to_add['name']} to the {scope} {scope_name}")
         if scope == PROJECT:
             request_type = 'addProjectPolicy'
             body = {"requestType": request_type,
                     "userKey": user_key,
                     "projectToken": token,
-                    "policy": policyToAdd}
+                    "policy": policy_to_add}
         elif scope == PRODUCT:
             request_type = 'addProductPolicy'
             body = {"requestType": request_type,
                     "userKey": user_key,
                     "productToken": token,
-                    "policy": policyToAdd}
-
-        post_request(request_type, body)
-
-    #logging.warning(f"adding policies to the {scope} {scope_name}")
+                    "policy": policy_to_add}
+        post_request(body)
 
 
 if __name__ == '__main__':
