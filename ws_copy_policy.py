@@ -329,7 +329,6 @@ def add_policies_from_template_to_target(token, scope_name, template_policies):
                     "userKey": user_key,
                     "productToken": token,
                     "policy": policy_to_add}
-
         post_request(body)
 
 
