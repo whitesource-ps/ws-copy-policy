@@ -1,6 +1,9 @@
 name: WS Copy Policy Build and Publish
 on: [push]
 
+permissions:
+  contents: read
+
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
@@ -30,6 +33,7 @@ jobs:
         with:
           files: ws-copy-policy.py requirements.txt LICENSE README.md CLA.md config/
           dest: ws-copy-policy.zip
+          recursive: false
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1
