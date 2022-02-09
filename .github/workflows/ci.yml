@@ -30,7 +30,7 @@ jobs:
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Zip release
-        uses: papeloto/action-zip@v1
+        uses: papeloto/action-zip@v2
         with:
           files: ws-copy-policy.py requirements.txt LICENSE README.md CLA.md config/
           dest: ws-copy-policy.zip
@@ -51,7 +51,7 @@ jobs:
           user: ${{ secrets.CONFLUENCE_USER }}
           token: ${{ secrets.CONFLUENCE_TOKEN }}
       - name: confluence-markdown-sync
-        uses: cupcakearmy/confluence-markdown-sync@v     
+        uses: cupcakearmy/confluence-markdown-sync@v1     
         with: 
           from: README.md
           to: 2313290370
