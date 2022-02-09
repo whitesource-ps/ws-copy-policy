@@ -1,6 +1,10 @@
 name: WS Copy Policy Build and Publish
 on: [push]
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
