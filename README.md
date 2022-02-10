@@ -29,24 +29,16 @@ In the event, the tag value of the project with `Policy.Template.Source` tag key
 - **Windows (PowerShell):**	10, 2012, 2016
 
 ### Prerequisites
-- Python 3.5 or above
+- Python 3.6 or above
 
-### Installation
-1. Download and unzip **ws-copy-policy.zip**.
-2. From the command line, navigate to the ws_copy_policy directory and install the package:  
-   `pip install -r requirements.txt`.
-3. Edit the **params.config** file and update the relevant parameters (see the configuration parameters below) or
-   use a cmd line for running. 
-
-### Execution
-From the command line:
-- `python ws-copy-policy.py -u $wsUrl -k $userKey -o $orgToken -s $scope -t $thread`
-
-Using a config file:
-- `python ws-copy-policy.py`
-
-**Note:** If more than one version of Python is installed on the target machine, use the appropriate executables
-for the installation and the execution (`pip3` and `python3` respectively)
+## Installation and Execution by pulling package from PyPi:
+1. Execute `pip install ws-copy-policy`
+* **Note**:  If installing packages as a non-root be sure to include the path to the executables within the Operating System paths.
+2. Run report:
+   `ws-copy-policy -u <URL> -k <USER_KEY> -o <ORG_TOKEN> -s <COPY_SCOPE> -t <THREAD_NUMBER>`
+   or
+   `ws-copy-policy <CONFIG_FILE_PATH>`
+* **Note**:  If installing packages as a non-root be sure to include the path to the executables within the Operating System paths.
 
 ### Configuration Parameters
 ```

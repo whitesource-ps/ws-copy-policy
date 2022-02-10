@@ -1,7 +1,9 @@
 import argparse
+import os
 import sys
 import logging
 from configparser import ConfigParser
+from dataclasses import dataclass
 from multiprocessing.pool import ThreadPool
 
 from ws_copy_policy._version import __version__, __tool_name__
@@ -13,12 +15,8 @@ LOG_DIR = 'logs'
 LOG_FILE_WITH_PATH = LOG_DIR + '/ws-copy-policy.log'
 PROJECT = 'project'
 PRODUCT = 'product'
-user_key = ''
-org_token = ''
-url = ''
-scope = None
-thread = 5
 logger = logging.getLogger()
+conf = None
 
 agent_info = "agentInfo"
 PS = "ps-"
@@ -28,70 +26,81 @@ AGENT_VERSION = "0.1.2"
 agent_info_details = {"agent": PS + AGENT_NAME, "agentVersion": AGENT_VERSION}
 
 
-class Configuration:
-    def __init__(self):
-        config = ConfigParser()
-        config.optionxform = str
-        config.read('../config/params.config')
-        # WS Settings
-        self.url = config.get('DEFAULT', 'wsUrl')
-        self.user_key = config.get('DEFAULT', 'userKey')
-        self.org_token = config.get('DEFAULT', 'orgToken')
-        self.scope = config.get('DEFAULT', 'scope')
-        self.thread = config.getint('DEFAULT', 'thread', fallback=5)
+def parse_config():
+    @dataclass
+    class Config:
+        url: str
+        org_token: str
+        user_key: str
+        scope: str
+        thread: int
 
+    global conf
 
-class ArgumentsParser:
-    def __init__(self):
-        """
+    if len(sys.argv) < 3:
+        maybe_config_file = True
+    if len(sys.argv) == 1:
+        conf_file = "../config/params.config"
+    elif not sys.argv[1].startswith('-'):
+        conf_file = sys.argv[1]
+    else:
+        maybe_config_file = False
 
-        :return:
-        """
+    if maybe_config_file:                             # Covers no conf file or only conf file
+        if os.path.exists(conf_file):
+            logger.info(f"loading configuration from file: {conf_file}")
+            config = ConfigParser()
+            config.optionxform = str
+            if os.path.exists(conf_file):
+                logger.info(f"loading configuration from file: {conf_file}")
+                config.read(conf_file)
+
+                conf = Config(
+                    url=config['DEFAULT'].get("wsUrl"),
+                    org_token=config['DEFAULT'].get("orgToken"),
+                    user_key=config['DEFAULT'].get("userKey"),
+                    scope=config['DEFAULT'].get("scope"),
+                    thread=config['DEFAULT'].getint('thread', 5))
+        else:
+            logger.error(f"No configuration file found at: {conf_file}")
+            raise FileNotFoundError
+    else:
         parser = argparse.ArgumentParser(description="Arguments parser")
         parser.add_argument("-u", "--url", help="WS url", dest='url', required=False)
         parser.add_argument("-k", "--userKey", help="WS User Key", dest='user_key', required=False)
         parser.add_argument("-o", "--orgToken", help="WS Org Token", dest='org_token', required=False)
         parser.add_argument("-s", "--scope", help="WS scope", dest='scope', required=False)
         parser.add_argument("-t", "--thread", help="thread number", dest='thread', required=False, type=int, default=5)
-        self.args = parser.parse_args()
+        conf = parser.parse_args()
+
+    return conf
 
 
 def main():
-    global user_key
-    global org_token
-    global url
-    global scope
-    global thread
+    global conf
+    try:
+        conf = parse_config()
+    except FileNotFoundError:
+        exit(-1)
 
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
     logging.info("starting...")
     logging.info("validating parameters")
 
-    args = sys.argv[1:]
-    if len(args) >= 8:
-        parser = ArgumentsParser()
-        config = parser.args
-    else:
-        config = Configuration()
-
-    org_token = config.org_token
-    user_key = config.user_key
-    url = config.url
-    scope = config.scope
-    thread = config.thread
-    if scope != PROJECT and scope != PRODUCT:
+    if conf.scope != PROJECT and conf.scope != PRODUCT:
         logging.error("scope should be 'project' or 'product'. Please check input parameters and try again.")
         exit(1)
-    logging.info("using url %s", url)
-    get_policies()
+    logging.info("using url %s", conf.url)
+    get_policies(conf.org_token, conf.user_key, conf.url, conf.scope, conf.thread)
 
     logging.info("Status: SUCCESS")
     sys.exit(0)
 
 
-def get_policies():
+def get_policies(org_token, user_key, url, scope, thread):
     """
 
+    :rtype: object
     """
     # getOrganizationProjectTags api
     if scope == PROJECT:
@@ -101,11 +110,12 @@ def get_policies():
     body = {"requestType": request_type,
             "userKey": user_key,
             "orgToken": org_token}
-    scope_tags = post_request(body)
+    scope_tags = post_request(body, url)
     template_value_to_policies = {}
     scope_token_to_template_value_and_policies = {}
     fill_template_values_and_projects_from_response(scope_tags, template_value_to_policies,
-                                                    scope_token_to_template_value_and_policies)
+                                                    scope_token_to_template_value_and_policies,
+                                                    scope, user_key, thread, url)
 
     scope_size = len(scope_token_to_template_value_and_policies)
     logging.info(f"TOTAL: {scope_size} {scope}s have a destination tag value and should be handled")
@@ -125,8 +135,8 @@ def get_policies():
             copy_target_policies = deepcopy(target_policies)
             if not is_template_policies_and_target_policies_equals(copy_template_policies, copy_target_policies):
                 logging.info(f"handling {size_of_finished_copies} out of the {scope_size} {scope}s.")
-                delete_policies_from_scope(token, scope_name, target_policies)
-                add_policies_from_template_to_target(token, scope_name, template_policies)
+                delete_policies_from_scope(token, scope_name, target_policies, url, scope, user_key)
+                add_policies_from_template_to_target(token, scope_name, template_policies, url, scope, user_key)
             else:
                 logging.info(f"handling {size_of_finished_copies} out of the {scope_size} {scope}s: "
                              f"{scope} {scope_name} has a destination value {template_value}, but it "
@@ -139,13 +149,8 @@ def get_policies():
         #logging.info(f"finish handling {size_of_finished_copies} out of the {scope_size} {scope}s")
 
 
-def post_request(body):
-    """
+def post_request(body, url) -> object:
 
-    :param request_type:
-    :param body:
-    :return:
-    """
     headers = {'content-type': 'application/json'}
     body.update({agent_info: agent_info_details})
     response = requests.post(url, data=json.dumps(body), headers=headers)
@@ -157,7 +162,7 @@ def post_request(body):
 def check_errors_in_response(response):
     """
 
-    :param response:
+    :rtype: object
     """
     error = False
     if "errorCode" in response:
@@ -172,12 +177,11 @@ def check_errors_in_response(response):
 
 
 def fill_template_values_and_projects_from_response(response, template_value_to_policies,
-                                                    scope_token_to_template_value_and_policies):
+                                                    scope_token_to_template_value_and_policies,
+                                                    scope, user_key, thread, url):
     """
 
-    :param response:
-    :param template_value_to_policies:
-    :param scope_token_to_template_value_and_policies:
+    :rtype: object
     """
     tag_template_key = "Policy.Template.Source"
     tag_scope_set_policies_key = "Policy.Template.Destination"
@@ -192,12 +196,16 @@ def fill_template_values_and_projects_from_response(response, template_value_to_
     if scope_array and len(scope_array) > 0:
         with ThreadPool(processes=thread) as thread_pool:
             thread_pool.starmap(worker, [(scope_item, body, request_type, tag_template_key, template_value_to_policies,
-                                          tag_scope_set_policies_key, scope_token_to_template_value_and_policies)
-                                         for scope_item in scope_array])
+                                          tag_scope_set_policies_key, scope_token_to_template_value_and_policies,
+                                          scope, url) for scope_item in scope_array])
 
 
 def worker(scope_item, body, request_type, tag_template_key, template_value_to_policies,
-           tag_scope_set_policies_key, scope_token_to_template_value_and_policies):
+           tag_scope_set_policies_key, scope_token_to_template_value_and_policies, scope, url):
+    """
+
+    :rtype: object
+    """
     tags = scope_item["tags"]
     scope_token = scope_item["token"]
     if scope == PROJECT:
@@ -241,9 +249,7 @@ def ordered(obj):
 def is_template_policies_and_target_policies_equals(template_policies, target_policies):
     """
 
-    :param template_policies:
-    :param target_policies:
-    :return:
+    :rtype: object
     """
     equals_policies = False
     if len(template_policies) == len(target_policies):
@@ -264,12 +270,10 @@ def is_template_policies_and_target_policies_equals(template_policies, target_po
     return equals_policies
 
 
-def delete_policies_from_scope(token, scope_name, target_policies):
+def delete_policies_from_scope(token, scope_name, target_policies, url, scope, user_key):
     """
 
-    :param token:
-    :param scope_name:
-    :param target_policies:
+    :rtype: object
     """
     policy_ids = []
     for policy in target_policies:
@@ -289,20 +293,17 @@ def delete_policies_from_scope(token, scope_name, target_policies):
                     "userKey": user_key,
                     "productToken": token,
                     "policyIds": policy_ids}
-        removed_policies = post_request(body)
+        removed_policies = post_request(body, url)
         if removed_policies['removedPolicies'] > 0:
             logging.info(f"  {removed_policies['removedPolicies'] } policies have been deleted from the {scope} "
                          f"{scope_name}")
 
 
-def add_policies_from_template_to_target(token, scope_name, template_policies):
+def add_policies_from_template_to_target(token, scope_name, template_policies, url, scope, user_key):
     """
 
-    :param token:
-    :param scope_name:
-    :param template_policies:
+    :rtype: object
     """
-
     for policy_to_add in template_policies:
         # remove from policy 'id' and 'creationTime' fields
         policy_to_add.pop("id", None)
@@ -330,7 +331,7 @@ def add_policies_from_template_to_target(token, scope_name, template_policies):
                     "userKey": user_key,
                     "productToken": token,
                     "policy": policy_to_add}
-        post_request(body)
+        post_request(body, url)
 
 
 if __name__ == '__main__':
