@@ -1,4 +1,4 @@
-name: WS Copy Policy Build and Publish
+name: CI
 on:
   push:
     branches:
@@ -7,10 +7,6 @@ on:
       - '*'
   schedule:
     - cron: '0 4 * * *'
-
-permissions:
-  contents: read
-
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
@@ -19,7 +15,6 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
-
     steps:
       - name: Set Environment Variables
         run: |
@@ -33,10 +28,16 @@ jobs:
             fi
           fi
       - uses: actions/checkout@v2
+      - name: Set package version
+        run: |
+          sed -E -i  "s/^__version__ = \"[a-z0-9\.]+\"/__version__ = \"$VERSION\"/g"  ${{ env.TOOL_DIR }}/_version.py
+      - uses: UnicornGlobal/trufflehog-actions-scan@master
+        with:
+          branch: ${{ github.head_ref }}
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.python-version }}          
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -48,6 +49,10 @@ jobs:
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --ignore=E501,F841
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Create Wheel Package
+        run: python setup.py bdist_wheel
+      - name: Install Wheel package
+        run: pip install dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1
@@ -57,7 +62,7 @@ jobs:
           artifacts: dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
           prerelease: ${{ env.RELEASE != 'true' }}
           generateReleaseNotes: true
-      - name: confluence-markdown-sync
+      - name: Publish to Confluence - Public
         uses: cupcakearmy/confluence-markdown-sync@v1
         with:
           from: README.md
@@ -65,7 +70,7 @@ jobs:
           cloud: whitesource
           user: ${{ secrets.CONFLUENCE_USER }}
           token: ${{ secrets.CONFLUENCE_TOKEN }}
-      - name: confluence-markdown-sync
+      - name: Publish to Confluence - Internal
         uses: cupcakearmy/confluence-markdown-sync@v1
         with:
           from: README.md
