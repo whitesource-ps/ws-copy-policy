@@ -4,6 +4,7 @@ import logging
 from configparser import ConfigParser
 from multiprocessing.pool import ThreadPool
 
+from ws_copy_policy._version import __version__, __tool_name__
 import requests
 import json
 from copy import deepcopy
