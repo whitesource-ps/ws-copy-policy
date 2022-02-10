@@ -16,7 +16,7 @@ setuptools.setup(
     url=f"https://github.com/whitesource-ps/{ws_name.replace('_', '-')}",
     license='LICENSE',
     packages=setuptools.find_packages(),
-    python_requires='>=3.7',
+    python_requires='>=3.6',
     install_requires=open('requirements.txt').read().splitlines(),
     extras_require={"docker": ["docker~=5.0.0"]},
     long_description=open("README.md").read(),
