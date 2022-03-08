@@ -1,15 +1,15 @@
 import argparse
+import json
+import logging
 import os
 import sys
-import logging
 from configparser import ConfigParser
+from copy import deepcopy
 from dataclasses import dataclass
 from multiprocessing.pool import ThreadPool
 
 from ws_copy_policy._version import __version__, __tool_name__
 import requests
-import json
-from copy import deepcopy
 
 LOG_DIR = 'logs'
 LOG_FILE_WITH_PATH = LOG_DIR + '/ws-copy-policy.log'
@@ -18,12 +18,7 @@ PRODUCT = 'product'
 logger = logging.getLogger()
 conf = None
 
-agent_info = "agentInfo"
-PS = "ps-"
-AGENT_NAME = "copy-policy"
-AGENT_VERSION = "0.1.2"
-
-agent_info_details = {"agent": PS + AGENT_NAME, "agentVersion": AGENT_VERSION}
+agent_info_details = {"agent": __tool_name__, "agentVersion": __version__}
 
 
 def parse_config():
@@ -46,7 +41,7 @@ def parse_config():
     else:
         maybe_config_file = False
 
-    if maybe_config_file:                             # Covers no conf file or only conf file
+    if maybe_config_file:  # Covers no conf file or only conf file
         if os.path.exists(conf_file):
             logger.info(f"loading configuration from file: {conf_file}")
             config = ConfigParser()
@@ -111,11 +106,15 @@ def get_policies(org_token, user_key, url, scope, thread):
             "userKey": user_key,
             "orgToken": org_token}
     scope_tags = post_request(body, url)
+
+    org_groups = post_request({"requestType": 'getAllGroups', "userKey": user_key, "orgToken": org_token}, url)
+    org_groups_ids = [group.get('id') for group in org_groups['groups']]
+
     template_value_to_policies = {}
     scope_token_to_template_value_and_policies = {}
     fill_template_values_and_projects_from_response(scope_tags, template_value_to_policies,
                                                     scope_token_to_template_value_and_policies,
-                                                    scope, user_key, thread, url)
+                                                    scope, user_key, thread, url, org_groups_ids)
 
     scope_size = len(scope_token_to_template_value_and_policies)
     logging.info(f"TOTAL: {scope_size} {scope}s have a destination tag value and should be handled")
@@ -146,13 +145,12 @@ def get_policies(org_token, user_key, url, scope, thread):
                             f"{scope} {scope_name} has a destination key value {template_value}, "
                             f"but there is no {scope} with this source key value. Skip to the next {scope}.")
         size_of_finished_copies = size_of_finished_copies + 1
-        #logging.info(f"finish handling {size_of_finished_copies} out of the {scope_size} {scope}s")
+        # logging.info(f"finish handling {size_of_finished_copies} out of the {scope_size} {scope}s")
 
 
 def post_request(body, url) -> object:
-
     headers = {'content-type': 'application/json'}
-    body.update({agent_info: agent_info_details})
+    body.update({'agentInfo': agent_info_details})
     response = requests.post(url, data=json.dumps(body), headers=headers)
     response_object = json.loads(response.text)
     check_errors_in_response(response_object)
@@ -178,7 +176,7 @@ def check_errors_in_response(response):
 
 def fill_template_values_and_projects_from_response(response, template_value_to_policies,
                                                     scope_token_to_template_value_and_policies,
-                                                    scope, user_key, thread, url):
+                                                    scope, user_key, thread, url, org_groups_ids):
     """
 
     :rtype: object
@@ -197,11 +195,11 @@ def fill_template_values_and_projects_from_response(response, template_value_to_
         with ThreadPool(processes=thread) as thread_pool:
             thread_pool.starmap(worker, [(scope_item, body, request_type, tag_template_key, template_value_to_policies,
                                           tag_scope_set_policies_key, scope_token_to_template_value_and_policies,
-                                          scope, url) for scope_item in scope_array])
+                                          scope, url, org_groups_ids) for scope_item in scope_array])
 
 
 def worker(scope_item, body, request_type, tag_template_key, template_value_to_policies,
-           tag_scope_set_policies_key, scope_token_to_template_value_and_policies, scope, url):
+           tag_scope_set_policies_key, scope_token_to_template_value_and_policies, scope, url, org_groups_ids):
     """
 
     :rtype: object
@@ -216,8 +214,29 @@ def worker(scope_item, body, request_type, tag_template_key, template_value_to_p
     headers = {'content-type': 'application/json'}
     response = requests.post(url, data=json.dumps(body), headers=headers)
     scope_policies = json.loads(response.text)
+    scope_policies_temp = []
+    for policy in scope_policies.get('policies'):
+
+        # check if the group from reassign policy was removed
+        if policy['action'].get('group'):
+            test = policy['action'].get('group').get('id')
+            if test not in org_groups_ids:
+                logging.info(f"The group of {policy['name']} reassign action policy was removed from the organization - the policy will not be copied")
+                policy['no_copy'] = True
+
+        # remove -1 license filter id from license type policies
+        if policy['filter']['type'] == 'LICENSE':
+            for lic in policy['filter']['licenses']:
+                if lic.get('id') == -1:
+                    lic.pop('id', None)
+
+    for policy in scope_policies.get('policies'):
+        if not policy.get('no_copy'):
+            scope_policies_temp.append(policy)
+    scope_policies['policies']=scope_policies_temp
+
     check_errors_in_response(scope_policies)
-    #scope_policies = post_request(request_type, body)
+    # scope_policies = post_request(request_type, body)
     if tag_template_key in tags:
         logging.info(f"found source {scope}: {scope_item['name']}. Key value: {tags[tag_template_key]}")
         # getProjectPolicies api
@@ -295,7 +314,7 @@ def delete_policies_from_scope(token, scope_name, target_policies, url, scope, u
                     "policyIds": policy_ids}
         removed_policies = post_request(body, url)
         if removed_policies['removedPolicies'] > 0:
-            logging.info(f"  {removed_policies['removedPolicies'] } policies have been deleted from the {scope} "
+            logging.info(f"  {removed_policies['removedPolicies']} policies have been deleted from the {scope} "
                          f"{scope_name}")
 
 
