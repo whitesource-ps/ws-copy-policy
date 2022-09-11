@@ -7,21 +7,21 @@
 
 
 # WhiteSource copy policy tool
-The script allows copying policies automatically, from the template project to the newly created projects, and update existing projects with the template policy.
-It should run periodically, in order to make sure that all the policies under the required projects are up to date.
+The script allows copying policies automatically, from the template project/product to the newly created projects/products, and update existing projects with the template policy.
+It should run periodically, in order to make sure that all the policies under the required projects/products are up to date.
 
 ### How to use the script
-1. Create an empty project (projects) with the required template policy.
-2. Tag an empty project with the following project tag: `key=Policy.Template.Source,  value=<yourUniqueTemplateName>`.
-3. For a new project creation that requires the template policy, add the following project tag: `key=Policy.Template.Destination, value=<yourUniqueTemplateName>`. It can be added via the UI or as part of the Unified Agent run.
-4. The template policy will be updated for the required projects.
-   **Note:** Make sure that the tag `Policy.Template.Source` value is unique and is presented only in one project.
+1. Create an empty project/product or few with the required template policy.
+2. Tag an empty project/product with the following project tag: `key=Policy.Template.Source,  value=<yourUniqueTemplateName>`.
+3. For a new project/product creation that requires the template policy, add the following project/product tag: `key=Policy.Template.Destination, value=<yourUniqueTemplateName>`. It can be added via the UI or as part of the Unified Agent run.
+4. The template policy will be updated for the required projects/products.
+   **Note:** Make sure that the tag `Policy.Template.Source` value is unique and is presented only in one project/product.
 
 ### What does the script do?
-For each project in the system, the script extracts the Tag key called: `Policy.Template.Source`, and the tag key called `Policy.Template.Destination`. 
-In the event, the tag value of the project with `Policy.Template.Source` tag key equals the tag value of the project with `Policy.Template.Destination` tag key, the script will do the following:
-- Delete the existing policies from the project with `Policy.Template.Destination` tag key.
-- Copy the project policies of the project with `Policy.Template.Source` tag key to the project with `Policy.Template.Destination` tag key.
+For each project/product in the system, the script extracts the Tag key called: `Policy.Template.Source`, and the tag key called `Policy.Template.Destination`. 
+In the event, the tag value of the project/product with `Policy.Template.Source` tag key equals the tag value of the project/product with `Policy.Template.Destination` tag key, the script will do the following:
+- Delete the existing policies from the project/product with `Policy.Template.Destination` tag key.
+- Copy the project/product policies of the project/product with `Policy.Template.Source` tag key to the project/product with `Policy.Template.Destination` tag key.
 
 
 ### Supported Operating Systems
@@ -55,7 +55,7 @@ In the event, the tag value of the project with `Policy.Template.Source` tag key
 |               |                      | your WhiteSource organization.                                       |
 ---------------------------------------------------------------------------------------------------------------
 | DEFAULT       | scope                | The scope where the copying policies should be performed on.         |
-|               |                      | Possible values: product/project.                                    |
+|               |                      | Possible values: project/product.                                    |
 ---------------------------------------------------------------------------------------------------------------
 | DEFAULT       | thread               | Multi-threading - speeds up the copying, but it depends              |
 |               |                      | on your environment capabilities (default: 5).                       |
