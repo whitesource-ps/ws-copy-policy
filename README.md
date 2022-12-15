@@ -29,7 +29,7 @@ In the event, the tag value of the project/product with `Policy.Template.Source`
 - **Windows (PowerShell):**	10, 2012, 2016
 
 ### Prerequisites
-- Python 3.6 or above
+- Python 3.9 or above
 
 ## Installation and Execution by pulling package from PyPi:
 1. Execute `pip install ws-copy-policy`

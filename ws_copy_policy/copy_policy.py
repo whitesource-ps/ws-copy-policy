@@ -120,7 +120,7 @@ def get_policies(org_token, user_key, url, scope, thread):
     logging.info(f"TOTAL: {scope_size} {scope}s have a destination tag value and should be handled")
     size_of_finished_copies = 1
     for token in scope_token_to_template_value_and_policies:
-        template_value = scope_token_to_template_value_and_policies[token]["template"]
+        template_value = scope_token_to_template_value_and_policies[token]["template"][0]
         if scope == PROJECT:
             scope_name = scope_token_to_template_value_and_policies[token]["project_name"]
         elif scope == PRODUCT:
@@ -240,7 +240,8 @@ def worker(scope_item, body, request_type, tag_template_key, template_value_to_p
     if tag_template_key in tags:
         logging.info(f"found source {scope}: {scope_item['name']}. Key value: {tags[tag_template_key]}")
         # getProjectPolicies api
-        template_value_to_policies[tags[tag_template_key]] = scope_policies["policies"]
+
+        template_value_to_policies[tags[tag_template_key][0]] = scope_policies["policies"]
     elif tag_scope_set_policies_key in tags:
         logging.info(f"found destination {scope}: {scope_item['name']}. Key value: {tags[tag_scope_set_policies_key]}")
         scope_policies["template"] = tags[tag_scope_set_policies_key]
