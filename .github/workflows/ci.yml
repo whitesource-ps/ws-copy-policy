@@ -63,14 +63,18 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-1
       - name: Upload to S3 bucket
+        env:
+          GIT_USER: ${{ github.actor }}
+          BRANCH: ${{ github.head_ref }}
+          COMMIT_ID: ${{ github.sha }}
         if: github.ref == 'refs/heads/staging'
         run: |
           TIMESTAMP=$(date +"%Y-%m-%d_%H-%M_")
           aws s3 cp dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl s3://mend-ps-staging/${{ env.TOOL_DIR }}/$TIMESTAMP_${{ env.TOOL_NAME }}.whl
           aws s3api put-object-tagging --bucket mend-ps-staging --key ${{ env.TOOL_DIR }}/$TIMESTAMP_${{ env.TOOL_NAME }}.whl --tagging 
-          "{\"TagSet\": [{\"Key\": \"User\", \"Value\": \"${{ github.actor }}\"}, 
-          {\"Key\": \"Branch\", \"Value\": \"${{ github.head_ref }}\"},
-          {\"Key\": \"CommitId\", \"Value\": \"${{ github.sha }}\"}]}
+          "{\"TagSet\": [{\"Key\": \"User\", \"Value\": \"$GIT_USER\"}, 
+          {\"Key\": \"Branch\", \"Value\": \"$BRANCH\"},
+          {\"Key\": \"CommitId\", \"Value\": \"$COMMIT_ID\"}]}
           "
 
       #      - name: Publish to Test PyPI
