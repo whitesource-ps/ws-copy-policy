@@ -69,13 +69,9 @@ jobs:
           COMMIT_ID: ${{ github.sha }}
         if: github.ref == 'refs/heads/staging'
         run: |
-          TIMESTAMP=$(date +"%Y-%m-%d_%H-%M_")
+          TIMESTAMP=$(date +"%Y-%m-%d_%H-%M")
           aws s3 cp dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl s3://mend-ps-staging/${{ env.TOOL_DIR }}/$TIMESTAMP_${{ env.TOOL_NAME }}.whl
-          aws s3api put-object-tagging --bucket mend-ps-staging --key ${{ env.TOOL_DIR }}/$TIMESTAMP_${{ env.TOOL_NAME }}.whl --tagging 
-          "{\"TagSet\": [{\"Key\": \"User\", \"Value\": \"$GIT_USER\"}, 
-          {\"Key\": \"Branch\", \"Value\": \"$BRANCH\"},
-          {\"Key\": \"CommitId\", \"Value\": \"$COMMIT_ID\"}]}
-          "
+          aws s3api put-object-tagging --bucket mend-ps-staging --key ${{ env.TOOL_DIR }}/$TIMESTAMP_${{ env.TOOL_NAME }}.whl --tagging "{\"TagSet\": [{\"Key\": \"User\", \"Value\": \"$GIT_USER\"},{\"Key\": \"Branch\", \"Value\": \"$BRANCH\"},{\"Key\": \"CommitId\", \"Value\": \"$COMMIT_ID\"}]}"
 
       #      - name: Publish to Test PyPI
       #        if: startsWith(github.ref, 'refs/tags/test-v')
