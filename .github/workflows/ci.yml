@@ -21,6 +21,7 @@ jobs:
     steps:
       - name: Set Environment Variables
         run: |
+          echo "PYTHON_VERSION=${{ matrix.python-version }}" >> $GITHUB_ENV
           echo "VERSION=0.0.0.ci0" >> $GITHUB_ENV
           echo "RELEASE=false" >> $GITHUB_ENV
           echo "TOOL_DIR=$TOOL_NAME" >> $GITHUB_ENV
@@ -54,8 +55,6 @@ jobs:
       - name: Install Wheel package
         run: pip install dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
       - name: copy whl
-        env:
-          PYTHON_VERSION: ${{ matrix.python-version }}
         run: |
           mkdir dist/${{ env.PYTHON_VERSION }}
           cp dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl dist/${{ env.PYTHON_VERSION }}/
