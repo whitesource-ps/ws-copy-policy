@@ -61,10 +61,11 @@ jobs:
 #      - uses: actions/upload-artifact@v3
 #        with:
 #          path: dist/${{ env.PYTHON_VERSION }}/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
-      - uses: actions/cache@v3
+      - name: cache whl
+        uses: actions/cache@v3
         with:
           path: dist/${{ env.PYTHON_VERSION }}/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
-          key: ${{ env.PYTHON_VERSION }}_${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
+          key: ${{ env.PYTHON_VERSION }}_${{ env.TOOL_DIR }}_${{ github.run_id }}
   publish:
     if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/staging'
     needs: [build-and-test]
