@@ -21,7 +21,6 @@ jobs:
     steps:
       - name: Set Environment Variables
         run: |
-          echo echo "PYTHON_MIN_VERSION=${{ matrix.python-version[0] }}" >> $GITHUB_ENV
           echo "PYTHON_VERSION=${{ matrix.python-version }}" >> $GITHUB_ENV
           echo "VERSION=0.0.0.ci0" >> $GITHUB_ENV
           echo "RELEASE=false" >> $GITHUB_ENV
@@ -78,7 +77,7 @@ jobs:
           GIT_USER: ${{ github.actor }}
           BRANCH: ${{ github.head_ref }}
           COMMIT_ID: ${{ github.sha }}
-        if: github.ref == 'refs/heads/staging'
+        if: github.ref == 'refs/heads/staging' && ${{ env.PYTHON_VERSION }}==3.9
         run: |
           TIMESTAMP=$(date +"%Y-%m-%d_%H-%M")
           aws s3 cp dist/${{ env.PYTHON_VERSION }}/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl s3://mend-ps-staging/${{ env.TOOL_DIR }}/"$TIMESTAMP"_${{ env.TOOL_NAME }}.whl
