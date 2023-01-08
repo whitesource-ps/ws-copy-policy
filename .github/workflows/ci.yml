@@ -56,8 +56,8 @@ jobs:
         run: pip install dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
       - name: Copy whl
         run: |
-          mkdir dist/${{ env.PYTHON_VERSION }}
-          cp dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl dist/${{ env.PYTHON_VERSION }}/
+          mkdir dist/$PYTHON_VERSION
+          cp dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl dist/$PYTHON_VERSION/
 #      - uses: actions/upload-artifact@v3
 #        with:
 #          path: dist/${{ env.PYTHON_VERSION }}/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
