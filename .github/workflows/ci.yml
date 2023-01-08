@@ -60,7 +60,6 @@ jobs:
           cp dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl dist/${{ env.PYTHON_VERSION }}/
       - uses: actions/upload-artifact@v3
         with:
-          name:
           path: dist/${{ env.PYTHON_VERSION }}/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
   publish:
     needs: [build-and-test]
