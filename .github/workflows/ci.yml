@@ -62,6 +62,7 @@ jobs:
         with:
           path: dist/${{ env.PYTHON_VERSION }}/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
   publish:
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/staging'
     needs: [build-and-test]
     runs-on: ubuntu-latest
     steps:
@@ -79,7 +80,7 @@ jobs:
         if: github.ref == 'refs/heads/staging'
         run: |
           TIMESTAMP=$(date +"%Y-%m-%d_%H-%M")
-          aws s3 cp dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl s3://mend-ps-staging/${{ env.TOOL_DIR }}/"$TIMESTAMP"_${{ env.TOOL_NAME }}.whl
+          aws s3 cp dist/${{ env.PYTHON_VERSION }}/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl s3://mend-ps-staging/${{ env.TOOL_DIR }}/"$TIMESTAMP"_${{ env.TOOL_NAME }}.whl
           aws s3api put-object-tagging --bucket mend-ps-staging --key ${{ env.TOOL_DIR }}/"$TIMESTAMP"_${{ env.TOOL_NAME }}.whl --tagging "{\"TagSet\": [{\"Key\": \"User\", \"Value\": \"$GIT_USER\"},{\"Key\": \"Branch\", \"Value\": \"$BRANCH\"},{\"Key\": \"CommitId\", \"Value\": \"$COMMIT_ID\"}]}"
       - name: Publish to PyPI
         if: startsWith(github.ref, 'refs/tags/v')
