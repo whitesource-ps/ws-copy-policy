@@ -15,14 +15,13 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TOOL_NAME: ws_copy_policy
-      PYTHON_VERSION: ${{ matrix.python-version }}
+      PYTHON_VERSION: ${{ matrix.python-version }}"
     strategy:
       matrix:
         python-version: ['3.9', '3.10' , '3.11']
     steps:
       - name: Set Environment Variables
         run: |
-#          echo "PYTHON_VERSION=${{ matrix.python-version }}" >> $GITHUB_ENV
           echo "VERSION=0.0.0.ci0" >> $GITHUB_ENV
           echo "RELEASE=false" >> $GITHUB_ENV
           echo "TOOL_DIR=$TOOL_NAME" >> $GITHUB_ENV
