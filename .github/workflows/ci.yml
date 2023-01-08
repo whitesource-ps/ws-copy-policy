@@ -21,6 +21,7 @@ jobs:
     steps:
       - name: Set Environment Variables
         run: |
+          echo echo "PYTHON_MIN_VERSION=${{ matrix.python-version[0] }}" >> $GITHUB_ENV
           echo "PYTHON_VERSION=${{ matrix.python-version }}" >> $GITHUB_ENV
           echo "VERSION=0.0.0.ci0" >> $GITHUB_ENV
           echo "RELEASE=false" >> $GITHUB_ENV
@@ -58,9 +59,9 @@ jobs:
         run: |
           mkdir dist/${{ env.PYTHON_VERSION }}
           cp dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl dist/${{ env.PYTHON_VERSION }}/
-      - uses: actions/upload-artifact@v3
-        with:
-          path: dist/${{ env.PYTHON_VERSION }}/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
+#      - uses: actions/upload-artifact@v3
+#        with:
+#          path: dist/${{ env.PYTHON_VERSION }}/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
   publish:
     if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/staging'
     needs: [build-and-test]
