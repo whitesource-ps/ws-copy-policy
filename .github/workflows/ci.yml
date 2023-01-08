@@ -54,13 +54,18 @@ jobs:
         run: python setup.py bdist_wheel
       - name: Install Wheel package
         run: pip install dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
-      - name: copy whl
+      - name: Copy whl
         run: |
           mkdir dist/${{ env.PYTHON_VERSION }}
           cp dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl dist/${{ env.PYTHON_VERSION }}/
 #      - uses: actions/upload-artifact@v3
 #        with:
 #          path: dist/${{ env.PYTHON_VERSION }}/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
+      - name: Cache whl
+        uses: actions/cache@v3
+        with:
+          path: dist/${{ env.PYTHON_VERSION }}/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
+          key: ${{ env.PYTHON_VERSION }}_${{ env.TOOL_DIR }}_${{ github.run_id }}
   publish:
     if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/staging'
     needs: [build-and-test]
@@ -72,6 +77,11 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-1
+      - name: Restore whl
+        uses: actions/cache@v3
+        with:
+          path: dist/${{ env.PYTHON_VERSION }}/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
+          key: ${{ env.PYTHON_VERSION }}_${{ env.TOOL_DIR }}_${{ github.run_id }}
       - name: Upload to S3 bucket
         env:
           GIT_USER: ${{ github.actor }}
