@@ -11,10 +11,10 @@ on:
   schedule:
     - cron: '0 4 * * *'
 jobs:
-  env:
-    TOOL_NAME: ws_copy_policy
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      TOOL_NAME: ws_copy_policy
     strategy:
       matrix:
         python-version: ['3.9', '3.10' , '3.11']
