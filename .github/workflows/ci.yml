@@ -56,7 +56,9 @@ jobs:
       - name: copy whl
         env:
           PYTHON_VERSION: ${{ matrix.python-version }}
-        run: cp dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl dist/${{ env.PYTHON_VERSION }}/
+        run: |
+          mkdir dist/${{ env.PYTHON_VERSION }}
+          cp dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl dist/${{ env.PYTHON_VERSION }}/
       - uses: actions/upload-artifact@v3
         with:
           name:
