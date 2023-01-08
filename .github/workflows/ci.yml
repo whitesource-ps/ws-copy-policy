@@ -13,12 +13,12 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    env:
-      TOOL_NAME: ws_copy_policy
-      PYTHON_VERSION: ${{ matrix.python-version }}"
     strategy:
       matrix:
         python-version: ['3.9', '3.10' , '3.11']
+    env:
+      TOOL_NAME: ws_copy_policy
+      PYTHON_VERSION: ${{ matrix.python-version }}"
     steps:
       - name: Set Environment Variables
         run: |
