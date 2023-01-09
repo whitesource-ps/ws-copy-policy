@@ -12,6 +12,7 @@ on:
     - cron: '0 4 * * *'
 env:
   TOOL_NAME: ws_copy_policy
+  PYTHON_VERSION: ${{ matrix.python-version }}
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -22,7 +23,7 @@ jobs:
     steps:
       - name: Set Environment Variables
         run: |
-          echo "PYTHON_VERSION=${{ matrix.python-version }}" >> $GITHUB_ENV
+#          echo "PYTHON_VERSION=${{ matrix.python-version }}" >> $GITHUB_ENV
           echo "VERSION=0.0.0.ci0" >> $GITHUB_ENV
           echo "RELEASE=false" >> $GITHUB_ENV
           echo "TOOL_DIR=${{env.TOOL_NAME}}" >> $GITHUB_ENV
