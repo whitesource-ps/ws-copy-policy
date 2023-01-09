@@ -12,7 +12,6 @@ on:
     - cron: '0 4 * * *'
 env:
   TOOL_NAME: ws_copy_policy
-  PYTHON_VERSION: ${{ matrix.python-version }}
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -22,20 +21,22 @@ jobs:
         python-version: ['3.9', '3.10' , '3.11']
     steps:
       - name: Set Environment Variables
+        id: set_env_vars
         run: |
-          echo "VERSION=0.0.0.ci0" >> $GITHUB_ENV
-          echo "RELEASE=false" >> $GITHUB_ENV
-          echo "TOOL_DIR=${{env.TOOL_NAME}}" >> $GITHUB_ENV
+          echo "PYTHON_VERSION=${{ matrix.python-version }}" >> $GITHUB_OUTPUT
+          echo "VERSION=0.0.0.ci0" >> $GITHUB_OUTPUT
+          echo "RELEASE=false" >> $GITHUB_OUTPUT
+          echo "TOOL_DIR=${{env.TOOL_NAME}}" >> $GITHUB_OUTPUT
           if [[ "$GITHUB_REF" == *"refs/tags/v"* || "$GITHUB_REF" == *"refs/tags/test-v"* ]]; then
-            echo "VERSION=$(echo ${{github.ref}} |  sed -r 's/^[\/a-zA-z-]+//')" >> $GITHUB_ENV
+            echo "VERSION=$(echo ${{github.ref}} |  sed -r 's/^[\/a-zA-z-]+//')" >> $GITHUB_OUTPUT
             if [[ $VERSION != *@(a|b)* ]]; then
-              echo "RELEASE=true" >> $GITHUB_ENV
+              echo "RELEASE=true" >> $GITHUB_OUTPUT
             fi
           fi
       - uses: actions/checkout@v2
       - name: Set package version
         run: |
-          sed -E -i  "s/^__version__ = \"[a-z0-9\.]+\"/__version__ = \"$VERSION\"/g"  ${{ env.TOOL_DIR }}/_version.py
+          sed -E -i  "s/^__version__ = \"[a-z0-9\.]+\"/__version__ = \"${{steps.set_env_vars.outputs.VERSION}}\"/g"  ${{ steps.set_env_vars.outputs.TOOL_DIR }}/_version.py
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -54,19 +55,19 @@ jobs:
       - name: Create Wheel Package
         run: python setup.py bdist_wheel
       - name: Install Wheel package
-        run: pip install dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
+        run: pip install dist/${{ steps.set_env_vars.outputs.TOOL_DIR }}-${{ steps.set_env_vars.outputs.VERSION }}-py3-none-any.whl
       - name: copy whl
         run: |
-          mkdir dist/${{ env.PYTHON_VERSION }}
-          cp dist/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl dist/${{ env.PYTHON_VERSION }}/
+          mkdir dist/${{ steps.set_env_vars.outputs.PYTHON_VERSION }}
+          cp dist/${{ steps.set_env_vars.outputs.TOOL_DIR }}-${{ steps.set_env_vars.outputs.VERSION }}-py3-none-any.whl dist/${{ steps.set_env_vars.outputs.PYTHON_VERSION }}/
       #      - uses: actions/upload-artifact@v3
       #        with:
       #          path: dist/${{ env.PYTHON_VERSION }}/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
       - name: cache whl
         uses: actions/cache@v3
         with:
-          path: dist/${{ env.PYTHON_VERSION }}/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
-          key: ${{ env.PYTHON_VERSION }}_${{ env.TOOL_DIR }}_${{ github.run_id }}
+          path: dist/${{ steps.set_env_vars.outputs.PYTHON_VERSION }}/${{ steps.set_env_vars.outputs.TOOL_DIR }}-${{ steps.set_env_vars.outputs.VERSION }}-py3-none-any.whl
+          key: ${{ steps.set_env_vars.outputs.PYTHON_VERSION }}_${{ esteps.set_env_vars.outputs.TOOL_DIR }}_${{ github.run_id }}
   publish:
     if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/PSD-223'
 #    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/staging'
