@@ -10,11 +10,12 @@ on:
       - '*'
   schedule:
     - cron: '0 4 * * *'
+env:
+  TOOL_NAME: ws_copy_policy
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    env:
-      TOOL_NAME: ws_copy_policy
+
     strategy:
       matrix:
         python-version: ['3.9', '3.10' , '3.11']
@@ -24,7 +25,7 @@ jobs:
           echo "PYTHON_VERSION=${{ matrix.python-version }}" >> $GITHUB_ENV
           echo "VERSION=0.0.0.ci0" >> $GITHUB_ENV
           echo "RELEASE=false" >> $GITHUB_ENV
-          echo "TOOL_DIR=$TOOL_NAME" >> $GITHUB_ENV
+          echo "TOOL_DIR=${{env.TOOL_NAME}}" >> $GITHUB_ENV
           if [[ "$GITHUB_REF" == *"refs/tags/v"* || "$GITHUB_REF" == *"refs/tags/test-v"* ]]; then
             echo "VERSION=$(echo ${{github.ref}} |  sed -r 's/^[\/a-zA-z-]+//')" >> $GITHUB_ENV
             if [[ $VERSION != *@(a|b)* ]]; then
