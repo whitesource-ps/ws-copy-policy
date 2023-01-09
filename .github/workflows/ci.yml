@@ -82,7 +82,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: dist/${{needs.build-and-test.outputs.python_version}}/${{needs.build-and-test.outputs.tool_dir}}-${{needs.build-and-test.outputs.version}}-py3-none-any.whl
-          key: ${{needs.build-and-test.outputs.version}}_${{needs.build-and-test.outputs.tool_dir}}_${{ github.run_id }}
+          key: ${{needs.build-and-test.outputs.python_version}}_${{needs.build-and-test.outputs.tool_dir}}_${{ github.run_id }}
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
