@@ -77,8 +77,8 @@ jobs:
       - name: Restore whl
         uses: actions/cache@v3
         with:
-          path: dist/${{ env.PYTHON_VERSION }}/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
-          key: ${{ env.PYTHON_VERSION }}_${{ env.TOOL_DIR }}_${{ github.run_id }}
+          path: dist/${{ steps.set_env_vars.outputs.PYTHON_VERSION }}/${{ steps.set_env_vars.outputs.TOOL_DIR }}-${{ steps.set_env_vars.outputs.VERSION }}-py3-none-any.whl
+          key: ${{ steps.set_env_vars.outputs.PYTHON_VERSION }}_${{ steps.set_env_vars.outputs.TOOL_DIR }}_${{ github.run_id }}
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
