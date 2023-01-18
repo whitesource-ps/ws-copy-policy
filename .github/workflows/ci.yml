@@ -64,9 +64,6 @@ jobs:
         run: |
           mkdir dist/${{ steps.set_env_vars.outputs.PYTHON_VERSION }}
           cp dist/${{ steps.set_env_vars.outputs.TOOL_DIR }}-${{ steps.set_env_vars.outputs.VERSION }}-py3-none-any.whl dist/${{ steps.set_env_vars.outputs.PYTHON_VERSION }}/
-      #      - uses: actions/upload-artifact@v3
-      #        with:
-      #          path: dist/${{ env.PYTHON_VERSION }}/${{ env.TOOL_DIR }}-${{ env.VERSION }}-py3-none-any.whl
       - name: cache whl
         uses: actions/cache@v3
         with:
@@ -95,7 +92,7 @@ jobs:
           GIT_USER: ${{ github.actor }}
           BRANCH: ${{ github.head_ref }}
           COMMIT_ID: ${{ github.sha }}
-        if: github.ref == 'refs/heads/PSD-223' && ${{needs.build-and-test.outputs.python_version}}==3.9
+        if: github.ref == 'refs/heads/PSD-223' && strategy.job-index == 0
 #        if: github.ref == 'refs/heads/staging' && ${{ env.PYTHON_VERSION }}==3.9
         run: |
           TIMESTAMP=$(date +"%Y-%m-%d_%H-%M")
