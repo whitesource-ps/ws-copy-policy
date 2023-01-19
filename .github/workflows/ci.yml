@@ -74,7 +74,7 @@ jobs:
     needs: [build-and-test]
     runs-on: ubuntu-latest
     env:
-      VER: strategy.job-index[0]
+      VER: ${{strategy.job-index[0]}}
     steps:
       - name: Restore whl
         uses: actions/cache@v3
