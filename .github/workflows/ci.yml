@@ -28,7 +28,7 @@ jobs:
       - name: Set Environment Variables
         id: set_env_vars
         run: |
-          echo "PY_MATRIX=${{strategy.job-index[0]}}" >> $GITHUB_OUTPUT
+          echo "PY_MATRIX=${{strategy.job-index}}" >> $GITHUB_OUTPUT
           echo "PYTHON_VERSION=${{ matrix.python-version }}" >> $GITHUB_OUTPUT
           echo "VERSION=0.0.0.ci0" >> $GITHUB_OUTPUT
           echo "RELEASE=false" >> $GITHUB_OUTPUT
