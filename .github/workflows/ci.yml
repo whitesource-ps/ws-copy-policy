@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       python_version: ${{ steps.set_env_vars.outputs.PYTHON_VERSION }}
+      py_matrix: ${{ steps.set_env_vars.outputs.PY_MATRIX }}
       version: ${{ steps.set_env_vars.outputs.VERSION }}
       release: ${{ steps.set_env_vars.outputs.RELEASE }}
       tool_dir: ${{ steps.set_env_vars.outputs.TOOL_DIR }}
@@ -27,6 +28,8 @@ jobs:
       - name: Set Environment Variables
         id: set_env_vars
         run: |
+          env:
+          echo "PY_MATRIX=${{strategy.job-index[0]}}" >> $GITHUB_OUTPUT
           echo "PYTHON_VERSION=${{ matrix.python-version }}" >> $GITHUB_OUTPUT
           echo "VERSION=0.0.0.ci0" >> $GITHUB_OUTPUT
           echo "RELEASE=false" >> $GITHUB_OUTPUT
@@ -73,8 +76,6 @@ jobs:
     if: ${{startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/staging'}} && strategy.job-index == 0
     needs: [build-and-test]
     runs-on: ubuntu-latest
-    env:
-      VER: ${{strategy.job-index[0]}}
     steps:
       - name: Restore whl
         uses: actions/cache@v3
