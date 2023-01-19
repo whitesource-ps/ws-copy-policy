@@ -70,7 +70,7 @@ jobs:
           path: dist/${{ steps.set_env_vars.outputs.PYTHON_VERSION }}/${{ steps.set_env_vars.outputs.TOOL_DIR }}-${{ steps.set_env_vars.outputs.VERSION }}-py3-none-any.whl
           key: ${{ steps.set_env_vars.outputs.PYTHON_VERSION }}_${{ steps.set_env_vars.outputs.TOOL_DIR }}_${{ github.run_id }}
   publish:
-    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/staging'
+    if: (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/staging') && strategy.job-index == 0
     needs: [build-and-test]
     runs-on: ubuntu-latest
     steps:
@@ -91,7 +91,7 @@ jobs:
           GIT_USER: ${{ github.actor }}
           BRANCH: ${{ github.head_ref }}
           COMMIT_ID: ${{ github.sha }}
-        if: github.ref == 'refs/heads/staging' && strategy.job-index == 0
+#        if: github.ref == 'refs/heads/staging' && strategy.job-index == 0
         run: |
           TIMESTAMP=$(date +"%Y-%m-%d_%H-%M")
           aws s3 cp dist/${{needs.build-and-test.outputs.python_version}}/${{needs.build-and-test.outputs.tool_dir}}-${{needs.build-and-test.outputs.version}}-py3-none-any.whl s3://mend-ps-staging/${{needs.build-and-test.outputs.tool_dir}}/"$TIMESTAMP"_${{ env.TOOL_NAME }}.whl
