@@ -43,8 +43,11 @@ jobs:
               echo "RELEASE=true" >> $GITHUB_OUTPUT
             fi
           fi
-          mkdir tmp/${{ steps.set_env_vars.outputs.MIN_PY_VER }}
+
       - uses: actions/checkout@v2
+      - name: set min folder
+        run: |
+          mkdir tmp/${{ steps.set_env_vars.outputs.MIN_PY_VER }}
       - name: Set package version
         run: |
           sed -E -i  "s/^__version__ = \"[a-z0-9\.]+\"/__version__ = \"${{steps.set_env_vars.outputs.VERSION}}\"/g"  ${{ steps.set_env_vars.outputs.TOOL_DIR }}/_version.py
