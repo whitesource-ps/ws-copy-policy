@@ -30,7 +30,7 @@ jobs:
         id: set_env_vars
         run: |
           echo "PYTHON_VERSION=${{ matrix.python-version }}" >> $GITHUB_OUTPUT
-          if ${{strategy.job-index}}=="0"; then
+          if "${{strategy.job-index}}"=="0"; then
             echo "MIN_PY_VER=${{ matrix.python-version }}" >> $GITHUB_OUTPUT
           fi
           echo "VERSION=0.0.0.ci0" >> $GITHUB_OUTPUT
