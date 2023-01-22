@@ -75,7 +75,7 @@ jobs:
 #    if: (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/PSD-224') && ${{ needs.build-and-test.outputs.py_matrix_index }}==0
     if: |
       ${{ startsWith(github.ref, 'refs/tags/v') }} || 
-      ${{ github.ref == 'refs/heads/PSD-224' }}
+      github.ref == 'refs/heads/PSD-224' }}
       && ${{ needs.build-and-test.outputs.py_matrix_index == 0 }}
 
     needs: [build-and-test]
