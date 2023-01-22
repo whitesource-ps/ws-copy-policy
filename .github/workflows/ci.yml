@@ -28,9 +28,10 @@ jobs:
       matrix:
 #        python-version: ['${{ MIN_PY_VERSION }}', '3.10' , '3.11']
         python-version:
-          - ${{ env.MIN_PY_VER }}
-          - ${{ env.MED_PY_VER }}
-          - ${{ env.LATEST_PY_VER }}
+          - 3.9
+#          - ${{ env.MIN_PY_VER }}
+#          - ${{ env.MED_PY_VER }}
+#          - ${{ env.LATEST_PY_VER }}
     steps:
       - name: Set Environment Variables
         id: set_env_vars
