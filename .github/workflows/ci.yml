@@ -12,6 +12,7 @@ on:
     - cron: '0 4 * * *'
 env:
   TOOL_NAME: ws_copy_policy
+  MIN_PY_VERSION: 3.9
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -23,7 +24,7 @@ jobs:
       tool_dir: ${{ steps.set_env_vars.outputs.TOOL_DIR }}
     strategy:
       matrix:
-        python-version: ['3.9', '3.10' , '3.11']
+        python-version: ['${{env.MIN_PY_VERSION}}', '3.10' , '3.11']
     steps:
       - name: Set Environment Variables
         id: set_env_vars
