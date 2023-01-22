@@ -73,7 +73,7 @@ jobs:
           key: ${{ steps.set_env_vars.outputs.PYTHON_VERSION }}_${{ steps.set_env_vars.outputs.TOOL_DIR }}_${{ github.run_id }}
   publish:
 #    if: (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/PSD-224') && ${{ needs.build-and-test.outputs.py_matrix_index }}==0
-    if: github.ref == 'refs/heads/PSD-224'
+    if: (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/PSD-224')
     needs: [build-and-test]
     runs-on: ubuntu-latest
     steps:
