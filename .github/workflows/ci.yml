@@ -73,7 +73,7 @@ jobs:
           key: ${{ steps.set_env_vars.outputs.PYTHON_VERSION }}_${{ steps.set_env_vars.outputs.TOOL_DIR }}_${{ github.run_id }}
   publish:
     if: |
-      strategy.job-index == 0 &&
+     ${{ strategy.job-index == 0 }} &&
       (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/PSD-223')
 #      (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/staging')
     needs: [build-and-test]
