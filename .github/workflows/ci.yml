@@ -33,7 +33,6 @@ jobs:
           if [[ ${{strategy.job-index}} == 0 ]]; then
             echo "MIN_PY_VER=${{ matrix.python-version }}" >> $GITHUB_OUTPUT
           fi
-          echo $MIN_PY_VER
           echo "VERSION=0.0.0.ci0" >> $GITHUB_OUTPUT
           echo "RELEASE=false" >> $GITHUB_OUTPUT
           echo "TOOL_DIR=${{env.TOOL_NAME}}" >> $GITHUB_OUTPUT
@@ -43,6 +42,7 @@ jobs:
               echo "RELEASE=true" >> $GITHUB_OUTPUT
             fi
           fi
+          echo "$MIN_PY_VER"
       - uses: actions/checkout@v2
       - name: Set package version
         run: |
