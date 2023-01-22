@@ -24,8 +24,7 @@ jobs:
       tool_dir: ${{ steps.set_env_vars.outputs.TOOL_DIR }}
     strategy:
       matrix:
-        python-version: ['3.9']
-#        python-version: ['3.9', '3.10' , '3.11'
+        python-version: ['3.9', '3.10' , '3.11']
     steps:
       - name: Set Environment Variables
         id: set_env_vars
