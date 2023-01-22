@@ -13,7 +13,7 @@ on:
 env:
   TOOL_NAME: ws_copy_policy
   MIN_PY_VER: 3.9
-  MED_PYTHON_VER: 3.10
+  MED_PY_VER: 3.10
   LATEST_PYTHON_VER: 3.11
 jobs:
   build-and-test:
@@ -28,9 +28,9 @@ jobs:
       matrix:
 #        python-version: ['${{ MIN_PY_VERSION }}', '3.10' , '3.11']
         python-version:
-          - ${{ env.MIN_PYTHON_VER }}
-          - ${{ env.MED_PYTHON_VER }}
-          - ${{ env.LATEST_PYTHON_VER }}
+          - ${{ env.MIN_PY_VER }}
+          - ${{ env.MED_PY_VER }}
+          - ${{ env.LATEST_PY_VER }}
     steps:
       - name: Set Environment Variables
         id: set_env_vars
