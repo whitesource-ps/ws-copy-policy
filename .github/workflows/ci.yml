@@ -74,11 +74,13 @@ jobs:
   publish:
 #    if: (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/PSD-224') && ${{ needs.build-and-test.outputs.py_matrix_index }}==0
     if: ${{ startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/PSD-224'}} && ${{ needs.build-and-test.outputs.py_matrix_index == '4'}}
-    run: |
-      echo "${{ needs.build-and-test.outputs.py_matrix_index}}"
+
     needs: [build-and-test]
     runs-on: ubuntu-latest
     steps:
+      - name: echo py_matrix_index
+        run: |
+          echo "${{ needs.build-and-test.outputs.py_matrix_index}}"
       - name: Restore whl
         uses: actions/cache@v3
         with:
