@@ -8,12 +8,6 @@ on:
       - '!whitesource/migrate-configuration**'
     tags:
       - '*'
-  pull_request:
-    branches:
-      - '**'
-      - '!ws-iac-scan-results/**'
-      - '!whitesource-remediate/master-all**'
-      - '!whitesource/migrate-configuration**'
   schedule:
     - cron: '0 4 * * *'
 env:
