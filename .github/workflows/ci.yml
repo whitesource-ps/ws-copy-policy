@@ -14,7 +14,7 @@ env:
   TOOL_NAME: ws_copy_policy
   MIN_PY_VER: 3.9
   MED_PY_VER: 3.10
-  LATEST_PYTHON_VER: 3.11
+  LATEST_PY_VER: 3.11
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
