@@ -1,6 +1,5 @@
 name: CI
-on:
-  push:
+on: [push,pull_request]:
     branches:
       - '**'
       - '!ws-iac-scan-results/**'
@@ -108,14 +107,14 @@ jobs:
           skip_existing: true
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-          packages_dir: dist/${{ env.MIN_PY_VER}}/
+          packages_dir: dist/${{needs.build-and-test.outputs.min_py_ver}}
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
-          artifacts: dist/${{ env.MIN_PY_VER}}/${{needs.build-and-test.outputs.tool_dir}}-${{needs.build-and-test.outputs.version}}-py3-none-any.whl
+          artifacts: dist/${{needs.build-and-test.outputs.min_py_ver}}/${{needs.build-and-test.outputs.tool_dir}}-${{needs.build-and-test.outputs.version}}-py3-none-any.whl
           prerelease: ${{ needs.build-and-test.outputs.release != 'true' }}
           generateReleaseNotes: true
       - name: Publish to Confluence - Public
