@@ -42,7 +42,7 @@ jobs:
               echo "RELEASE=true" >> $GITHUB_OUTPUT
             fi
           fi
-          mkdir dist/testtt/${{ steps.set_env_vars.outputs.MIN_PY_VER }}
+          mkdir /${{ steps.set_env_vars.outputs.MIN_PY_VER }}
       - uses: actions/checkout@v2
       - name: Set package version
         run: |
