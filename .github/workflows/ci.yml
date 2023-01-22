@@ -80,7 +80,7 @@ jobs:
     steps:
       - name: echo py_matrix_index
         run: |
-          echo "${{ needs.build-and-test.outputs.py_matrix_index}}"
+          echo "$GITHUB_OUTPUT"
       - name: Restore whl
         uses: actions/cache@v3
         with:
