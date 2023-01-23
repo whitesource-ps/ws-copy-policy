@@ -45,7 +45,7 @@ jobs:
               echo "RELEASE=true" >> $GITHUB_OUTPUT
             fi
           fi
-          echo "SOURCE_BRANCH=git branch --contains ${{env.COMMIT_ID}} |grep PSD |sed 's/[ *]//g'" >> $GITHUB_OUTPUT
+          echo "SOURCE_BRANCH=$(echo git branch --contains ${{env.COMMIT_ID}} | grep PSD | sed 's/[ *]//g')" >> $GITHUB_OUTPUT
 
       - uses: actions/checkout@v2
       - name: Set package version
