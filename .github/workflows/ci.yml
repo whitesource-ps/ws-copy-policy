@@ -12,7 +12,9 @@ on:
     - cron: '0 4 * * *'
 env:
   TOOL_NAME: ws_copy_policy
-
+  GIT_USER: ${{ github.actor }}
+#  BRANCH: ${{ github.head_ref }}
+  COMMIT_ID: ${{ github.sha }}
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -22,6 +24,7 @@ jobs:
       version: ${{ steps.set_env_vars.outputs.VERSION }}
       release: ${{ steps.set_env_vars.outputs.RELEASE }}
       tool_dir: ${{ steps.set_env_vars.outputs.TOOL_DIR }}
+      source_branch: ${{ steps.set_env_vars.outputs.SOURCE_BRANCH }}
     strategy:
       matrix:
         python-version: ['3.9', '3.10' , '3.11']
@@ -42,6 +45,7 @@ jobs:
               echo "RELEASE=true" >> $GITHUB_OUTPUT
             fi
           fi
+          echo "SOURCE_BRANCH=git branch --contains ${{env.COMMIT_ID}} |grep PSD" >> $GITHUB_OUTPUT
 
       - uses: actions/checkout@v2
       - name: Set package version
@@ -93,14 +97,14 @@ jobs:
           aws-region: eu-west-1
 
       - name: Upload to S3 bucket
-        env:
-          GIT_USER: ${{ github.actor }}
-          BRANCH: ${{ github.head_ref }}
-          COMMIT_ID: ${{ github.sha }}
+#        env:
+#          GIT_USER: ${{ github.actor }}
+#          BRANCH: ${{ github.head_ref }}
+#          COMMIT_ID: ${{ github.sha }}
         run: |
           TIMESTAMP=$(date +"%Y-%m-%d_%H-%M")
           aws s3 cp dist/${{needs.build-and-test.outputs.min_py_ver}}/${{needs.build-and-test.outputs.tool_dir}}-${{needs.build-and-test.outputs.version}}-py3-none-any.whl s3://mend-ps-staging/${{needs.build-and-test.outputs.tool_dir}}/"$TIMESTAMP"_${{ env.TOOL_NAME }}.whl
-          aws s3api put-object-tagging --bucket mend-ps-staging --key ${{needs.build-and-test.outputs.tool_dir}}/"$TIMESTAMP"_${{ env.TOOL_NAME }}.whl --tagging "{\"TagSet\": [{\"Key\": \"User\", \"Value\": \"$GIT_USER\"},{\"Key\": \"Branch\", \"Value\": \"$BRANCH\"},{\"Key\": \"CommitId\", \"Value\": \"$COMMIT_ID\"}]}"
+          aws s3api put-object-tagging --bucket mend-ps-staging --key ${{needs.build-and-test.outputs.tool_dir}}/"$TIMESTAMP"_${{ env.TOOL_NAME }}.whl --tagging "{\"TagSet\": [{\"Key\": \"User\", \"Value\": \"${{ env.GIT_USER}}\"},{\"Key\": \"Branch\", \"Value\": \"${{needs.build-and-test.outputs.source_branch}}\"},{\"Key\": \"CommitId\", \"Value\": \"${{env.COMMIT_ID}}\"}]}"
       - name: Publish to PyPI
         if: startsWith(github.ref, 'refs/tags/v')
         uses: pypa/gh-action-pypi-publish@release/v1
