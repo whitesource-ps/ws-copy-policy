@@ -24,7 +24,7 @@ jobs:
       version: ${{ steps.set_env_vars.outputs.VERSION }}
       release: ${{ steps.set_env_vars.outputs.RELEASE }}
       tool_dir: ${{ steps.set_env_vars.outputs.TOOL_DIR }}
-      source_branch: ${{ steps.set_env_vars.outputs.SOURCE_BRANCH }}
+      source_branch: ${{ steps.get_source_branch.outputs.SOURCE_BRANCH }}
     strategy:
       matrix:
         python-version: ['3.9', '3.10' , '3.11']
@@ -45,12 +45,11 @@ jobs:
               echo "RELEASE=true" >> $GITHUB_OUTPUT
             fi
           fi
-          echo "SOURCE_BRANCH=$(git branch --contains ${{env.COMMIT_ID}} | grep PSD | sed 's/[ *]//g')" >> $GITHUB_OUTPUT
-          echo "$VERSION"
-          echo "$SOURCE_BRANCH"
-
-
       - uses: actions/checkout@v2
+      - name: get source branch
+        id: get_source_branch
+        run: |
+          echo "SOURCE_BRANCH=$(git branch --contains ${{env.COMMIT_ID}} | grep PSD | sed 's/[ *]//g')" >> $GITHUB_OUTPUT
       - name: Set package version
         run: |
           sed -E -i  "s/^__version__ = \"[a-z0-9\.]+\"/__version__ = \"${{steps.set_env_vars.outputs.VERSION}}\"/g"  ${{ steps.set_env_vars.outputs.TOOL_DIR }}/_version.py
