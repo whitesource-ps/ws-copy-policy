@@ -45,7 +45,6 @@ jobs:
               echo "RELEASE=true" >> $GITHUB_OUTPUT
             fi
           fi
-#          echo "SOURCE_BRANCH=test_branch" >> $GITHUB_OUTPUT
           echo "SOURCE_BRANCH=$(git branch --contains ${{env.COMMIT_ID}} | grep PSD | sed 's/[ *]//g')" >> $GITHUB_OUTPUT
 
 
