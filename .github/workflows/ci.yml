@@ -101,7 +101,7 @@ jobs:
           aws-region: eu-west-1
 
       - name: Upload to S3 bucket
-        env:
+#        env:
 #          BRANCH: ${{needs.build-and-test.outputs.source_branch}}
 #          GIT_USER: ${{ github.actor }}
 #
