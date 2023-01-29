@@ -29,13 +29,13 @@ In the event, the tag value of the project/product with `Policy.Template.Source`
 - **Windows (PowerShell):**	10, 2012, 2016
 
 ### Prerequisites
-- Python 3.6 or above
+- Python 3.9 or above
 
 ## Installation and Execution by pulling package from PyPi:
 1. Execute `pip install ws-copy-policy`
 * **Note**:  If installing packages as a non-root be sure to include the path to the executables within the Operating System paths.
 2. Run report:
-   `ws-copy-policy -u <URL> -k <USER_KEY> -o <ORG_TOKEN> -s <COPY_SCOPE> -t <THREAD_NUMBER>`
+   `ws-copy-policy --wssURL <URL> --userKey <USER_KEY> --apiKey <ORG_TOKEN> --scope <COPY_SCOPE> --thread <THREAD_NUMBER>`
    or
    `ws-copy-policy <CONFIG_FILE_PATH>`
 * **Note**:  If installing packages as a non-root be sure to include the path to the executables within the Operating System paths.
@@ -45,14 +45,15 @@ In the event, the tag value of the project/product with `Policy.Template.Source`
 ===============================================================================================================
 | Group         | Parameter            | Description                                                          |
 ===============================================================================================================
-| DEFAULT       | wsUrl                | Mend server URL. Can be found under the 'Integrate' tab in    |   
-|               |                      | your Mend organization.                                       |
+| DEFAULT       | wssUrl                | Mend server URL. Can be found under the 'Integrate' tab in          |   
+|               |                      | your Mend organization under Server URL:                             |
+|               |                      | https://<domain>.whitesourcesoftware.com                             |
 ---------------------------------------------------------------------------------------------------------------
-| DEFAULT       | userKey              | Mend User Key. Can be found under the 'Profile' section in    |
-|               |                      | your Mend organization.                                       |
+| DEFAULT       | userKey              | Mend User Key. Can be found under the 'Profile' section in           |
+|               |                      | your Mend organization.                                              |
 ---------------------------------------------------------------------------------------------------------------
-| DEFAULT       | orgToken             | Mend API Key. Can be found under the 'Integrate' tab in your  |
-|               |                      | your Mend organization.                                       |
+| DEFAULT       | apiKey               | Mend API Key. Can be found under the 'Integrate' tab in your         |
+|               |                      | your Mend organization.                                              |
 ---------------------------------------------------------------------------------------------------------------
 | DEFAULT       | scope                | The scope where the copying policies should be performed on.         |
 |               |                      | Possible values: project/product.                                    |

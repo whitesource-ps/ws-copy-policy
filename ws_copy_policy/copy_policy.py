@@ -11,6 +11,7 @@ from multiprocessing.pool import ThreadPool
 from ws_copy_policy._version import __version__, __tool_name__
 import requests
 
+API_URL_SUFFIX = '/api/v1.4'
 LOG_DIR = 'logs'
 LOG_FILE_WITH_PATH = LOG_DIR + '/ws-copy-policy.log'
 PROJECT = 'project'
@@ -25,11 +26,22 @@ def parse_config():
     @dataclass
     class Config:
         url: str
-        org_token: str
+        api_key: str
         user_key: str
         scope: str
         thread: int
 
+        def __post_init__(self):
+            if os.environ.get("WS_WSS_URL"):
+                self.url = os.environ.get("WS_WSS_URL")
+            if os.environ.get("WS_APIKEY"):
+                self.url = os.environ.get("WS_APIKEY")
+            if os.environ.get("WS_USERKEY"):
+                self.url = os.environ.get("WS_USERKEY")
+            if os.environ.get("WS_SCOPE"):
+                self.url = os.environ.get("WS_SCOPE")
+            if os.environ.get("WS_THREAD"):
+                self.url = os.environ.get("WS_THREAD")
     global conf
 
     if len(sys.argv) < 3:
@@ -51,8 +63,8 @@ def parse_config():
                 config.read(conf_file)
 
                 conf = Config(
-                    url=config['DEFAULT'].get("wsUrl"),
-                    org_token=config['DEFAULT'].get("orgToken"),
+                    url=config['DEFAULT'].get("wsUrl") if not config['DEFAULT'].get("wssUrl") else config['DEFAULT'].get("wssUrl"),
+                    api_key=config['DEFAULT'].get("orgToken") if not config['DEFAULT'].get("apiKey") else config['DEFAULT'].get("apiKey"),
                     user_key=config['DEFAULT'].get("userKey"),
                     scope=config['DEFAULT'].get("scope"),
                     thread=config['DEFAULT'].getint('thread', 5))
@@ -61,13 +73,14 @@ def parse_config():
             raise FileNotFoundError
     else:
         parser = argparse.ArgumentParser(description="Arguments parser")
-        parser.add_argument("-u", "--url", help="WS url", dest='url', required=False)
-        parser.add_argument("-k", "--userKey", help="WS User Key", dest='user_key', required=False)
-        parser.add_argument("-o", "--orgToken", help="WS Org Token", dest='org_token', required=False)
-        parser.add_argument("-s", "--scope", help="WS scope", dest='scope', required=False)
+        parser.add_argument("-u", "--url","--wssUrl", help="WS url", dest='url', required=False,default=os.environ.get("WS_WSS_URL"))
+        parser.add_argument("-k", "--userKey", help="WS User Key", dest='user_key', required=False,default=os.environ.get("WS_USERKEY"))
+        parser.add_argument("-o", "--orgToken","--apiKey", help="WS Org Token", dest='api_key', required=False,default=os.environ.get("WS_APIKEY"))
+        parser.add_argument("-s", "--scope", help="WS scope", dest='scope', required=False,default=os.environ.get("WS_SCOPE"))
         parser.add_argument("-t", "--thread", help="thread number", dest='thread', required=False, type=int, default=5)
         conf = parser.parse_args()
 
+    conf.url = conf.url + API_URL_SUFFIX if not conf.url.endswith(tuple(['/api'])) else conf.url
     return conf
 
 
@@ -86,13 +99,13 @@ def main():
         logging.error("scope should be 'project' or 'product'. Please check input parameters and try again.")
         exit(1)
     logging.info("using url %s", conf.url)
-    get_policies(conf.org_token, conf.user_key, conf.url, conf.scope, conf.thread)
+    get_policies(conf.api_key, conf.user_key, conf.url, conf.scope, conf.thread)
 
     logging.info("Status: SUCCESS")
     sys.exit(0)
 
 
-def get_policies(org_token, user_key, url, scope, thread):
+def get_policies(api_key, user_key, url, scope, thread):
     """
 
     :rtype: object
@@ -104,10 +117,10 @@ def get_policies(org_token, user_key, url, scope, thread):
         request_type = "getOrganizationProductTags"
     body = {"requestType": request_type,
             "userKey": user_key,
-            "orgToken": org_token}
+            "orgToken": api_key}
     scope_tags = post_request(body, url)
 
-    org_groups = post_request({"requestType": 'getAllGroups', "userKey": user_key, "orgToken": org_token}, url)
+    org_groups = post_request({"requestType": 'getAllGroups', "userKey": user_key, "orgToken": api_key}, url)
     org_groups_ids = [group.get('id') for group in org_groups['groups']]
 
     template_value_to_policies = {}
@@ -120,7 +133,7 @@ def get_policies(org_token, user_key, url, scope, thread):
     logging.info(f"TOTAL: {scope_size} {scope}s have a destination tag value and should be handled")
     size_of_finished_copies = 1
     for token in scope_token_to_template_value_and_policies:
-        template_value = scope_token_to_template_value_and_policies[token]["template"]
+        template_value = scope_token_to_template_value_and_policies[token]["template"][0]
         if scope == PROJECT:
             scope_name = scope_token_to_template_value_and_policies[token]["project_name"]
         elif scope == PRODUCT:
@@ -233,14 +246,15 @@ def worker(scope_item, body, request_type, tag_template_key, template_value_to_p
     for policy in scope_policies.get('policies'):
         if not policy.get('no_copy'):
             scope_policies_temp.append(policy)
-    scope_policies['policies']=scope_policies_temp
+    scope_policies['policies'] = scope_policies_temp
 
     check_errors_in_response(scope_policies)
     # scope_policies = post_request(request_type, body)
     if tag_template_key in tags:
         logging.info(f"found source {scope}: {scope_item['name']}. Key value: {tags[tag_template_key]}")
         # getProjectPolicies api
-        template_value_to_policies[tags[tag_template_key]] = scope_policies["policies"]
+
+        template_value_to_policies[tags[tag_template_key][0]] = scope_policies["policies"]
     elif tag_scope_set_policies_key in tags:
         logging.info(f"found destination {scope}: {scope_item['name']}. Key value: {tags[tag_scope_set_policies_key]}")
         scope_policies["template"] = tags[tag_scope_set_policies_key]
