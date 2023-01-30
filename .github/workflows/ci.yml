@@ -123,6 +123,7 @@ jobs:
           artifacts: dist/${{needs.build-and-test.outputs.min_py_ver}}/${{needs.build-and-test.outputs.tool_dir}}-${{needs.build-and-test.outputs.version}}-py3-none-any.whl
           prerelease: ${{ needs.build-and-test.outputs.release != 'true' }}
           generateReleaseNotes: true
+      - uses: actions/checkout@v2
       - name: Publish to Confluence - Public
         if: startsWith(github.ref, 'refs/tags/v')
         uses: cupcakearmy/confluence-markdown-sync@v1
