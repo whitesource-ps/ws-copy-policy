@@ -62,7 +62,6 @@ In the event, the tag value of the project/product with `Policy.Template.Source`
 |               |                      | on your environment capabilities (default: 5).                       |
 ===============================================================================================================
 ```
-
 ### Author
 Mend.io ©
 
