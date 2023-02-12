@@ -48,7 +48,7 @@ jobs:
       - name: get source branch
         id: get_source_branch
         run: |
-          echo "SOURCE_BRANCH=$(git branch --contains ${{env.COMMIT_ID}} | grep PSD | sed 's/[ *]//g')" >> $GITHUB_OUTPUT
+          echo "SOURCE_BRANCH=$(git branch --contains ${{env.COMMIT_ID}} | grep -E 'feature|staging' | sed 's/[ *]//g')" >> $GITHUB_OUTPUT
       - name: Set package version
         run: |
           sed -E -i  "s/^__version__ = \"[a-z0-9\.]+\"/__version__ = \"${{steps.set_env_vars.outputs.VERSION}}\"/g"  ${{ steps.set_env_vars.outputs.TOOL_DIR }}/_version.py
