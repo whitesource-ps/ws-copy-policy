@@ -6,7 +6,7 @@
 [![Python 3.6](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Blue_Python_3.6%2B_Shield_Badge.svg/86px-Blue_Python_3.6%2B_Shield_Badge.svg.png)](https://www.python.org/downloads/release/python-360/)
 
 
-# MEND copy policy tool
+# Mend copy policy tool
 The script allows copying policies automatically, from the template project/product to the newly created projects/products, and update existing projects with the template policy.
 It should run periodically, in order to make sure that all the policies under the required projects/products are up to date.
 
