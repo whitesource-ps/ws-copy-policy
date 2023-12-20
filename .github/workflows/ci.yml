@@ -8,8 +8,6 @@ on:
       - '!whitesource/migrate-configuration**'
     tags:
       - '*'
-  schedule:
-    - cron: '0 4 * * *'
 env:
   TOOL_NAME: ws_copy_policy
   GIT_USER: ${{ github.actor }}
