@@ -19,7 +19,7 @@ PRODUCT = 'product'
 logger = logging.getLogger()
 conf = None
 
-agent_info_details = {"agent": __tool_name__, "agentVersion": __version__}
+agent_info_details = {"agent": f"ps-{__tool_name__}".replace('_', '-'), "agentVersion": __version__}
 
 
 def parse_config():
